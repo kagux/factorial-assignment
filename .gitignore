@@ -1,0 +1,4 @@
+.DS_Store
+.vscode
+.bundle
+database/seed.sql
