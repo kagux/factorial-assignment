@@ -321,14 +321,14 @@ To fetch IDs of "Frame Finish" variants compatible with current build, we would 
  ```ruby
   # GET /builds/:id/compatibility
     def compatibility
-      # Code to get product, target_part and selected variants from DB
+      # Code to get product, target_variants and selected variants from DB
       # With errors on missing part or no selected variants, etc
       
       # Use the compatibility service to determine compatible variants
       compatible_variants_ids = CompatibilityService.get_compatible_variants_ids(
         product: product,
         selected_variants: selected_variants,
-        target_part: target_part
+        target_variants: target_variants
       )
       
       # Return IDs
