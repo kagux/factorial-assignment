@@ -12,8 +12,8 @@ db_config = YAML.load_file(config_path, aliases: true)[ENV['ENV']]
 ActiveRecord::Base.establish_connection(db_config)
 
 if ENV['ENV'] == 'test'
-  ActiveRecord::Base.logger = Logger.new(STDOUT)
-  ActiveRecord::Base.logger.level = Logger::DEBUG
+  # ActiveRecord::Base.logger = Logger.new(STDOUT)
+  # ActiveRecord::Base.logger.level = Logger::DEBUG
 end
 
 # Configure Redis

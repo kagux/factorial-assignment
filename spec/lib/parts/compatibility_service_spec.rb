@@ -11,7 +11,7 @@ RSpec.describe Parts::CompatibilityService do
       result = described_class.get_compatible_variants_ids(
         product: product,
         selected_variants: [],
-        target_part: finish_part,
+        target_variants: finish_part.part_variants,
       )
 
       expect(result).to contain_exactly(
@@ -25,7 +25,7 @@ RSpec.describe Parts::CompatibilityService do
       result = described_class.get_compatible_variants_ids(
         product: product,
         selected_variants: [diamond_small_frame],
-        target_part: finish_part,
+        target_variants: finish_part.part_variants,
       )
 
       expect(result).to contain_exactly(
@@ -54,7 +54,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(glossy_finish_variant.id, chrome_finish_variant.id)
@@ -64,7 +64,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [glossy_finish_variant],
-          target_part: frame_part,
+          target_variants: frame_part.part_variants,
         )
 
         expect(result).to contain_exactly(diamond_small_frame.id)
@@ -81,7 +81,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(glossy_finish_variant.id, chrome_finish_variant.id)
@@ -91,7 +91,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: create(:product),
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to be_empty
@@ -112,7 +112,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [suspension_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(matte_finish_variant.id, glossy_finish_variant.id)
@@ -122,7 +122,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [chrome_finish_variant],
-          target_part: frame_part,
+          target_variants: frame_part.part_variants,
         )
 
         expect(result).to contain_exactly(diamond_small_frame.id, diamond_large_frame.id, suspension_large_frame.id)
@@ -150,7 +150,7 @@ RSpec.describe Parts::CompatibilityService do
         small_result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame, diamond_large_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
         expect(small_result).to contain_exactly(glossy_finish_variant.id)
       end
@@ -173,7 +173,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame, road_wheel_variant],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         # INCLUDE rule limits to glossy, but EXCLUDE rule removes it
@@ -206,13 +206,13 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame, road_wheel_variant],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(chrome_finish_variant.id)
       end
 
-      it "works on permuations of selected variants" do
+      it "works on permutations of selected variants" do
         create(:part_variant_compatibility,
                product: product,
                part_variant_1: road_wheel_variant,
@@ -223,7 +223,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [road_wheel_variant, chrome_finish_variant],
-          target_part: frame_part,
+          target_variants: frame_part.part_variants,
         )
 
         expect(result).to contain_exactly(diamond_small_frame.id)
@@ -252,7 +252,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(glossy_finish_variant.id)
@@ -269,7 +269,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame], 
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(glossy_finish_variant.id)
@@ -279,7 +279,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: create(:product),
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to be_empty
@@ -289,7 +289,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [glossy_finish_variant],
-          target_part: frame_part,
+          target_variants: frame_part.part_variants,
         )
 
         expect(result).to contain_exactly(diamond_small_frame.id, diamond_large_frame.id)
@@ -306,7 +306,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_large_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to be_empty
@@ -333,7 +333,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [mountain_wheel_variant, diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         # The expected result should ONLY include glossy_finish_variant
@@ -363,7 +363,7 @@ RSpec.describe Parts::CompatibilityService do
         small_result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
         expect(small_result).to contain_exactly(chrome_finish_variant.id, glossy_finish_variant.id)
       end
@@ -378,7 +378,7 @@ RSpec.describe Parts::CompatibilityService do
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_large_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to contain_exactly(glossy_finish_variant.id)

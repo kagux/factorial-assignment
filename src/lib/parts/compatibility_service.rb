@@ -42,14 +42,13 @@ module Parts
     # @param selected_variants: Array of currently selected variants
     # @param target_part: The part we want to find compatible variants for
     # @return Array of compatible variant IDs
-    def get_compatible_variants_ids(product:, selected_variants:, target_part:)
-      target_variants = target_part.part_variants
+    def get_compatible_variants_ids(product:, selected_variants:, target_variants:)
       target_variants_ids = target_variants.pluck(:id)
 
 
       # if we call with a mismatching product, there will be no rules and it will appear compatible with everything
       # so either we never call this method with a mismatching product, or we double check here
-      return [] if product_mismatch?(product, target_part, selected_variants)
+      return [] if product_mismatch?(product, target_variants + selected_variants)
       
       return target_variants_ids if selected_variants.empty?
 
@@ -104,8 +103,8 @@ module Parts
       rule.compatibility_type.downcase == "exclude" ? :exclude : :include
     end
 
-    def product_mismatch?(product, target_part, selected_variants)
-      product.id != target_part.product_id || selected_variants.any? { |v| v.product_id != product.id }
+    def product_mismatch?(product, variants)
+      variants.any? { |v| v.product_id != product.id }
     end
   end
 end
