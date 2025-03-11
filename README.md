@@ -5,7 +5,7 @@
 ## Assumptions
 
 ### Core Vocabulary
-- Product: Defines a set of custom build sport goods such as bicycle, ski, skateboard, surfboard
+- Product: Defines a set of custom built sport goods such as bicycle, ski, skateboard, surfboard
 - Part: Defines components that a product is composed of, such as wheels, frames, etc.
 - Part Option: Attributes like color, size, material, etc.
 - Part Variant: An individual stock unit with defined set of options (e.g., "Shiny Red Diamond Frame")
@@ -368,6 +368,8 @@ I've put the implementation in [pricing_service.rb](./src/lib/parts/pricing_serv
 ## 4. Add to Cart Action
 When the user clicks the 'Add to Cart' button, here's what happens:
 - The frontend sends a request to the API to add the selected build to the cart
+- CHECK if build is valid: items in stock and compatible
+    - if not, return an error
 - If there isn't one already, a new `shopping_cart` gets created for the customer
 - If it's not there yet, a new `shopping_cart_builds` entry is created for the selected build, adding it to the cart
 - If the shopping cart already has this build, we just bump up the quantity
