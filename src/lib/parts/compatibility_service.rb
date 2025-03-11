@@ -47,10 +47,10 @@ module Parts
       end
     end
 
-    # Determines which variants of a target part are compatible with already selected variants
+    # Determines which variants of a target are compatible with already selected variants
     # @param product: The product we want to find compatible variants for
     # @param selected_variants: Array of currently selected variants
-    # @param target_part: The part we want to find compatible variants for
+    # @param target_variants: Array of target variants
     # @return Array of compatible variant IDs
     def get_compatible_variants_ids(product:, selected_variants:, target_variants:)
       target_variants_ids = target_variants.pluck(:id)
