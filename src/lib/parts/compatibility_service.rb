@@ -31,10 +31,20 @@ module Parts
     CACHE_KEY_SINGLE = "factorial:compatibility:product:"
     CACHE_KEY_ALL = "factorial:compatibility:*"
 
-
     def initialize(cache: Cache::RedisCache.new, batch_size: 200)
       @cache = cache
       @batch_size = batch_size
+    end
+
+    def are_compatible?(product:, variants:)
+      variants.combination(2).all? do |v1, v2|
+        compatible_ids = get_compatible_variants_ids(
+          product: product, 
+          selected_variants: [v1], 
+          target_variants: [v2]
+        )
+        compatible_ids == [v2.id]
+      end
     end
 
     # Determines which variants of a target part are compatible with already selected variants
@@ -45,11 +55,10 @@ module Parts
     def get_compatible_variants_ids(product:, selected_variants:, target_variants:)
       target_variants_ids = target_variants.pluck(:id)
 
-
       # if we call with a mismatching product, there will be no rules and it will appear compatible with everything
       # so either we never call this method with a mismatching product, or we double check here
       return [] if product_mismatch?(product, target_variants + selected_variants)
-      
+
       return target_variants_ids if selected_variants.empty?
 
       selected_variants_ids = selected_variants.pluck(:id)
