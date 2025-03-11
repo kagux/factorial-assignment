@@ -42,24 +42,30 @@ module Parts
     # Determines price adjustments for variants of a target part based on already selected variants
     # @param product: The product we want to find price adjustments for
     # @param selected_variants: Array of currently selected variants
-    # @param target_part: The part we want to find price adjustments for
+    # @param target_variants: Array of target variants we want to find price adjustments for
     # @return Array of price adjustment objects with variant_1_id, variant_2_id, and adjustment details
-    def get_price_adjustments(product:, selected_variants:, target_part:)
-      target_variants = target_part.part_variants
-      target_variants_ids = Set.new target_variants.pluck(:id)
+    def get_price_adjustments(product:, selected_variants:, target_variants:)
 
       return [] if selected_variants.empty?
 
       selected_variants_ids = selected_variants.pluck(:id)
-
+      target_variants_ids = Set.new target_variants.pluck(:id)
       rules = rules_for_product(product)
-      selected_variants_ids.map do |id|
-        matching_variants = rules[:by_variants][id] || Set.new
-        target_matches = target_variants_ids & matching_variants
-        target_matches.map do |match_id|
-          get_matching_rules_from_index(rules, id, match_id)
+      seen_pairs = Set.new
+      price_adjustments = []
+
+      selected_variants_ids.each do |id|
+        matching_ids = rules[:by_variants][id] & target_variants_ids
+        matching_ids.each do |match_id|
+          pair_id = variants_pair_id(id, match_id)
+          next if seen_pairs.include?(pair_id)
+          
+          seen_pairs << pair_id
+          matching_rules = get_matching_rules_from_index(rules, id, match_id)
+          price_adjustments.concat(matching_rules)
         end
-      end.flatten
+      end
+      price_adjustments
     end
 
     private
@@ -69,8 +75,8 @@ module Parts
       
       rules[:by_pair][pair_id].map do |rule_id|
         rules[:by_id][rule_id].merge(
-          variant_1_id: variant_1_id,
-          variant_2_id: variant_2_id,
+          variant_1_id: variant_1_id < variant_2_id ? variant_1_id : variant_2_id,
+          variant_2_id: variant_1_id < variant_2_id ? variant_2_id : variant_1_id,
         )
       end
     end

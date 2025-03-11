@@ -11,7 +11,7 @@ RSpec.describe Parts::PricingService do
       result = described_class.get_price_adjustments(
         product: product,
         selected_variants: [diamond_small_frame],
-        target_part: finish_part,
+        target_variants: finish_part.part_variants,
       )
 
       expect(result).to be_empty
@@ -21,7 +21,7 @@ RSpec.describe Parts::PricingService do
       result = described_class.get_price_adjustments(
         product: product,
         selected_variants: [],
-        target_part: finish_part,
+        target_variants: finish_part.part_variants,
       )
 
       expect(result).to be_empty
@@ -43,7 +43,7 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result.count).to eq(1)
@@ -65,7 +65,7 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [matte_finish_variant],
-          target_part: frame_part,
+          target_variants: frame_part.part_variants,
         )
 
         # there should be two price adjustments: for small and large diamond frames
@@ -93,19 +93,19 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result.count).to eq(1)
         expect(result.first[:variant_1_id]).not_to eq(glossy_finish_variant.id)
         expect(result.first[:variant_2_id]).not_to eq(glossy_finish_variant.id)
       end
-      
+
       it "properly scopes price adjustments to a product" do
         result = described_class.get_price_adjustments(
           product: create(:product),
           selected_variants: [diamond_small_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         expect(result).to be_empty
@@ -138,7 +138,7 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_large_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         valid_diamond_ids = [diamond_large_frame.id, matte_finish_variant.id]
@@ -179,7 +179,7 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_large_frame],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         sorted_result = result.sort_by { |r| [r[:amount]] }
@@ -232,7 +232,7 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_small_frame, mountain_wheel_variant],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         valid_diamond_matte_ids = [diamond_small_frame.id, matte_finish_variant.id]
@@ -259,12 +259,22 @@ RSpec.describe Parts::PricingService do
           }
         )
       end
+      
+      it "returns all price adjustments when target variants are same as selected variants" do
+        selected_variants = [diamond_small_frame, matte_finish_variant, mountain_wheel_variant]
+        result = described_class.get_price_adjustments(
+          product: product,
+          selected_variants: selected_variants,
+          target_variants: selected_variants,
+        )
+        expect(result.count).to eq(2)
+      end
 
       it "returns no adjustments for variants without rules" do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_small_frame, mountain_wheel_variant],
-          target_part: finish_part,
+          target_variants: finish_part.part_variants,
         )
 
         # Check no adjustment exists for glossy finish
@@ -281,7 +291,7 @@ RSpec.describe Parts::PricingService do
         result = described_class.get_price_adjustments(
           product: product,
           selected_variants: [diamond_small_frame],
-          target_part: empty_part,
+          target_variants: [],
         )
 
         expect(result).to be_empty
