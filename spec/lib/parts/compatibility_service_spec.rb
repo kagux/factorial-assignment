@@ -180,6 +180,7 @@ RSpec.describe Parts::CompatibilityService do
         expect(result).to contain_exactly(matte_finish_variant.id)
       end
     end
+    
 
     context "with multiple selected variants" do
       before do
@@ -228,7 +229,19 @@ RSpec.describe Parts::CompatibilityService do
 
         expect(result).to contain_exactly(diamond_small_frame.id)
       end
+
+      it "scopes rules to parts and assumes compatibility for other parts" do
+
+        result = described_class.get_compatible_variants_ids(
+          product: product,
+          selected_variants: [diamond_small_frame],
+          target_variants: [road_wheel_variant],
+        )
+
+        expect(result).to contain_exactly(road_wheel_variant.id)
+      end
     end
+    
 
     context "with compatibility using part options" do
       before do
@@ -338,6 +351,15 @@ RSpec.describe Parts::CompatibilityService do
 
         # The expected result should ONLY include glossy_finish_variant
         expect(result).to contain_exactly(glossy_finish_variant.id)
+      end
+      
+      it "scopes compatibility rules to parts" do
+        result = described_class.get_compatible_variants_ids(
+          product: product,
+          selected_variants: [diamond_small_frame],
+          target_variants: [mountain_wheel_variant],
+        )
+        expect(result).to contain_exactly(mountain_wheel_variant.id)
       end
     end
 

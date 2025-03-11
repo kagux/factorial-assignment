@@ -39,9 +39,9 @@ module Parts
     def are_compatible?(product:, variants:)
       variants.combination(2).all? do |v1, v2|
         compatible_ids = get_compatible_variants_ids(
-          product: product, 
-          selected_variants: [v1], 
-          target_variants: [v2]
+          product: product,
+          selected_variants: [v1],
+          target_variants: [v2],
         )
         compatible_ids == [v2.id]
       end
@@ -68,9 +68,14 @@ module Parts
 
       selected_variants_ids.each do |id|
         rule = rules_for_product(product)[id] || {}
-        include_ids = rule[:include] || Set.new
-        selected_variants_includes &= include_ids unless include_ids.empty?
-        selected_variants_excludes += rule[:exclude] || Set.new
+        include_rules = rule[:include] || hash_set
+        exclude_rules = rule[:exclude] || hash_set
+        target_variants.pluck(:part_id).uniq.each do |part_id|
+          include_ids = include_rules[part_id]
+          exclude_ids = exclude_rules[part_id]
+          selected_variants_includes &= include_ids unless include_ids.empty?
+          selected_variants_excludes += exclude_ids
+        end
       end
 
       # Calculate final compatible IDs:
@@ -91,11 +96,15 @@ module Parts
       end
     end
 
-    def index_rules_for_product(product)
-      rules = Hash.new { |h, k| h[k] = { include: Set.new, exclude: Set.new } }
+    def hash_set
+      Hash.new { |h, k| h[k] = Set.new }
+    end
 
-      add_rules_to_index(PartVariantCompatibility.active.for_product(product).all, rules)
-      add_rules_to_index(PartOptionCompatibility.active.for_product(product).with_variants_ids, rules)
+    def index_rules_for_product(product)
+      rules = Hash.new { |h, k| h[k] = { include: hash_set, exclude: hash_set } }
+
+      add_rules_to_index(PartVariantCompatibility.active.for_product(product).with_part_ids, rules)
+      add_rules_to_index(PartOptionCompatibility.active.for_product(product).with_variants_and_parts_ids, rules)
 
       rules
     end
@@ -103,8 +112,8 @@ module Parts
     def add_rules_to_index(collection, rules)
       collection.find_each(batch_size: @batch_size) do |rule|
         rule_type = compatibility_type_key(rule)
-        rules[rule.part_variant_1_id][rule_type] << rule.part_variant_2_id
-        rules[rule.part_variant_2_id][rule_type] << rule.part_variant_1_id
+        rules[rule.part_variant_1_id][rule_type][rule.part_2_id] << rule.part_variant_2_id
+        rules[rule.part_variant_2_id][rule_type][rule.part_1_id] << rule.part_variant_1_id
       end
     end
 
