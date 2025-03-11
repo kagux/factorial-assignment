@@ -5,7 +5,7 @@ RSpec.describe Parts::PricingService do
   describe ".get_price_adjustments" do
     include_context "parts setup"
 
-    let(:described_class) { Parts::PricingService.new(cache: Cache::RedisCache.new) }
+    let(:described_class) { Parts::PricingService.new(cache: Cache::NullCache.new) }
 
     it "returns empty array when no price rules exist" do
       result = described_class.get_price_adjustments(
