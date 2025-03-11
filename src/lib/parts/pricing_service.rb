@@ -115,7 +115,7 @@ module Parts
 
     def format_rule(rule)
       {
-        id: rule.id,
+        rule_id: rule.id,
         amount: rule.price_adjustment,
         name: rule.name,
         description: rule.description,
