@@ -294,7 +294,7 @@ This is a simplified implementation with a few assumptions:
 - The store will have way more reads than writes
 - Compatibility rules won't change much, except when adding new variants/products
 - A small delay on first load is fine - users won't really notice it
-- Memory shouldn't be an issue for quite a while. Less than 500mb to cache 1000 varitans. I provided some estimation in comments to code.
+- Memory shouldn't be an issue for quite a while. Less than 20mb to cache pricing and compatibility rules for 1000 varitans. I provided some estimation in comments to code.
 - Pricing or compatibility services don't check stock status - that info comes from `GET /products/{product_id}/parts/{part_id}/variants`
 
 Once Marcus gets a lot more popular worldwide, we can look into different ways of handling the cache. For example, we could keep sets of compatibilities pre-calculated in Redis. This would add some complexity with data syncing (through change data capture) and cache invalidations. But Marcus has a long way to go before we need to worry about that.
