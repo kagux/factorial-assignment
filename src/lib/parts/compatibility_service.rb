@@ -53,15 +53,13 @@ module Parts
     # @param target_variants: Array of target variants
     # @return Array of compatible variant IDs
     def get_compatible_variants_ids(product:, selected_variants:, target_variants:)
-      target_variants_ids = target_variants.pluck(:id)
+      filtered_target_variants = filter_by_product(product, target_variants)
+      target_variants_ids = filtered_target_variants.pluck(:id).uniq
+      target_variants_parts_ids = filtered_target_variants.pluck(:part_id)
+      selected_variants_ids = filter_by_product(product, selected_variants).pluck(:id)
 
-      # if we call with a mismatching product, there will be no rules and it will appear compatible with everything
-      # so either we never call this method with a mismatching product, or we double check here
-      return [] if product_mismatch?(product, target_variants + selected_variants)
-
-      return target_variants_ids if selected_variants.empty?
-
-      selected_variants_ids = selected_variants.pluck(:id)
+      return target_variants_ids if selected_variants_ids.empty?
+      return [] if target_variants_ids.empty?
 
       selected_variants_includes = Set.new target_variants_ids
       selected_variants_excludes = Set.new
@@ -70,7 +68,7 @@ module Parts
         rule = rules_for_product(product)[id] || {}
         include_rules = rule[:include] || hash_set
         exclude_rules = rule[:exclude] || hash_set
-        target_variants.pluck(:part_id).uniq.each do |part_id|
+        target_variants_parts_ids.each do |part_id|
           include_ids = include_rules[part_id]
           exclude_ids = exclude_rules[part_id]
           selected_variants_includes &= include_ids unless include_ids.empty?
@@ -121,8 +119,8 @@ module Parts
       rule.compatibility_type.downcase == "exclude" ? :exclude : :include
     end
 
-    def product_mismatch?(product, variants)
-      variants.any? { |v| v.product_id != product.id }
+    def filter_by_product(product, variants)
+      variants.select { |v| v.product_id == product.id }
     end
   end
 end

@@ -4,9 +4,8 @@ require_relative "../../support/parts_setup_context"
 RSpec.describe Parts::CompatibilityService do
   include_context "parts setup"
   let (:described_class) { Parts::CompatibilityService.new(cache: Cache::NullCache.new) }
-  
-  describe ".get_compatible_variants_ids" do
 
+  describe ".get_compatible_variants_ids" do
     it "returns all variants of the target part when no selected variants are provided" do
       result = described_class.get_compatible_variants_ids(
         product: product,
@@ -180,7 +179,6 @@ RSpec.describe Parts::CompatibilityService do
         expect(result).to contain_exactly(matte_finish_variant.id)
       end
     end
-    
 
     context "with multiple selected variants" do
       before do
@@ -231,7 +229,6 @@ RSpec.describe Parts::CompatibilityService do
       end
 
       it "scopes rules to parts and assumes compatibility for other parts" do
-
         result = described_class.get_compatible_variants_ids(
           product: product,
           selected_variants: [diamond_small_frame],
@@ -241,9 +238,8 @@ RSpec.describe Parts::CompatibilityService do
         expect(result).to contain_exactly(road_wheel_variant.id)
       end
     end
-    
 
-    context "with compatibility using part options" do
+    describe "with compatibility using part options" do
       before do
         # Create option value compatibility rules
         # Diamond frame type is compatible with Glossy finish
@@ -288,14 +284,58 @@ RSpec.describe Parts::CompatibilityService do
         expect(result).to contain_exactly(glossy_finish_variant.id)
       end
 
-      it "properly scopes compatibility rules to a product" do
-        result = described_class.get_compatible_variants_ids(
-          product: create(:product),
-          selected_variants: [diamond_small_frame],
-          target_variants: finish_part.part_variants,
-        )
+      context "with variants from mismatching product" do
+        let(:new_product) { create(:product) }
+        let(:new_part) { create(:part, product: new_product) }
+        let(:new_option) { create(:option, part: new_part) }
+        let(:new_option_value) { create(:option_value, option: new_option) }
+        let(:new_variant) { create(:part_variant, part: new_part, product: new_product) }
 
-        expect(result).to be_empty
+        before do
+          create(:part_variant_option_value, part_variant: new_variant, option_value: new_option_value)
+        end
+
+        it "properly scopes compatibility rules to a product" do
+          result = described_class.get_compatible_variants_ids(
+            product: create(:product),
+            selected_variants: [diamond_small_frame],
+            target_variants: finish_part.part_variants,
+          )
+
+          expect(result).to be_empty
+        end
+
+        it "ignores target variants not in the product but keeps the rest" do
+          create(:part_option_compatibility,
+                 product: product,
+                 option_value_1_id: diamond_frame.id,
+                 option_value_2_id: new_option_value.id,
+                 compatibility_type: "INCLUDE")
+
+          result = described_class.get_compatible_variants_ids(
+            product: product,
+            selected_variants: [diamond_small_frame],
+            target_variants: finish_part.part_variants + [new_variant],
+          )
+
+          expect(result).to contain_exactly(glossy_finish_variant.id)
+        end
+
+        it "ignores selected variants not in product but keeps the rest" do
+          create(:part_option_compatibility,
+                 product: product,
+                 option_value_1_id: new_option_value.id,
+                 option_value_2_id: matte_finish.id,
+                 compatibility_type: "INCLUDE")
+
+          result = described_class.get_compatible_variants_ids(
+            product: product,
+            selected_variants: [diamond_small_frame, new_variant],
+            target_variants: finish_part.part_variants,
+          )
+
+          expect(result).to contain_exactly(glossy_finish_variant.id)
+        end
       end
 
       it "returns correct variants when called in reverse order" do
@@ -352,7 +392,7 @@ RSpec.describe Parts::CompatibilityService do
         # The expected result should ONLY include glossy_finish_variant
         expect(result).to contain_exactly(glossy_finish_variant.id)
       end
-      
+
       it "scopes compatibility rules to parts" do
         result = described_class.get_compatible_variants_ids(
           product: product,
@@ -407,9 +447,8 @@ RSpec.describe Parts::CompatibilityService do
       end
     end
   end
-  
-  describe ".are_compatible?" do
 
+  describe ".are_compatible?" do
     before do
       # Part variant compatibility: diamond_small_frame can have chrome_finish
       create(:part_variant_compatibility,
@@ -424,7 +463,6 @@ RSpec.describe Parts::CompatibilityService do
              option_value_1_id: diamond_frame.id,
              option_value_2_id: mountain_wheel.id,
              compatibility_type: "INCLUDE")
-      
     end
 
     it "returns true if all variants are compatible" do
@@ -436,7 +474,7 @@ RSpec.describe Parts::CompatibilityService do
 
       expect(result).to be_truthy
     end
-    
+
     it "returns false if any variant is incompatible" do
       selected_variants = [diamond_small_frame, matte_finish_variant, mountain_wheel_variant]
       result = described_class.are_compatible?(
