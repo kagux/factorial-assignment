@@ -36,6 +36,9 @@ module Parts
       @batch_size = batch_size
     end
 
+    # Determines if all variants are compatible based on the compatibility rules
+    # @param product: The product we want to check compatibility for
+    # @param variants: Array of variants to check
     def are_compatible?(product:, variants:)
       variants.combination(2).all? do |v1, v2|
         compatible_ids = get_compatible_variants_ids(
