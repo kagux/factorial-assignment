@@ -1,4 +1,4 @@
-Status: [![Ruby Tests](https://github.com/kagux/factorial-assignment/actions/workflows/ruby_tests.yml/badge.svg)](https://github.com/kagux/factorial-assignment/actions/workflows/ruby_tests.yml)
+[![Ruby Tests](https://github.com/kagux/factorial-assignment/actions/workflows/ruby_tests.yml/badge.svg)](https://github.com/kagux/factorial-assignment/actions/workflows/ruby_tests.yml)
 
 
 ## Requirements
