@@ -11,7 +11,7 @@ development:
 test:
   <<: *default
   database: factorial_test
-  password: posgres
+  password: postgres
   user: postgres
 
 # Redis configuration

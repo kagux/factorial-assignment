@@ -11,7 +11,7 @@ ActiveRecord::Base.establish_connection(
   adapter: "postgresql",
   host: ENV.fetch("POSTGRESQL_HOST", "localhost"),
   username: "postgres",
-  password: "posgres",
+  password: "postgres",
   database: "factorial_development",
 )
 
