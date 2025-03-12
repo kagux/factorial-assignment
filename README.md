@@ -1,3 +1,6 @@
+Status: [![Ruby Tests](https://github.com/kagux/factorial-assignment/actions/workflows/ruby_tests.yml/badge.svg)](https://github.com/kagux/factorial-assignment/actions/workflows/ruby_tests.yml)
+
+
 ## Requirements
 - Frontend and Backend are split and communicate via API
 - [Marcus store description](./docs/requirements.md)
